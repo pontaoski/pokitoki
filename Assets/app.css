@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    @apply bg-cloud-300;
+}
+
+input[type="password"], input[type="text"], input[type="email"] {
+    @apply py-1 px-2 rounded bg-white;
+    @apply border border-solid border-stone-50;
+    @apply w-full;
+}
+
+form {
+    @apply space-y-4 flex flex-col items-start;
+}
+
+form label {
+    @apply font-bold;
+}
+
+input[type="submit"], button, .pokitoki-button {
+    border-radius: 3px;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.125);
+    text-shadow: 1px 1px #ffffff;
+
+    @apply bg-gradient-to-b from-cloud-50 to-cloud-200 text-charcoal;
+    @apply px-4 py-1;
+    @apply border border-solid border-stone-50;
+    @apply active:bg-none active:bg-plasma-blue/30 active:border-plasma-blue;
+    @apply hover:border-plasma-blue focus:border-plasma-blue;
+}
+
+input[type="submit"]:active, button:active, .pokitoki-button:active {
+    text-shadow: none;
+}

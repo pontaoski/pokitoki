@@ -1,14 +1,9 @@
 import Fluent
 import Vapor
+import MongoDBVapor
 
 func routes(_ app: Application) throws {
-    app.get { req in
-        return req.view.render("index", ["title": "Hello Vapor!"])
-    }
-
-    app.get("hello") { req -> String in
-        return "Hello, world!"
-    }
-
-    try app.register(collection: TodoController())
+    try app.register(collection: IndexController())
+    try app.register(collection: AuthController())
+    try app.register(collection: ProjectController())
 }

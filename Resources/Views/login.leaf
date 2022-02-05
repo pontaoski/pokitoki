@@ -1,0 +1,31 @@
+#extend("base"):
+    #export("body"):
+        <div class="
+                m-auto mt-10 px-4
+                w-full max-w-lg
+                prose
+                lg:flex-row lg:space-y-0">
+
+            <h1>Login</h1>
+
+            <form action="/auth/login" method="post">
+                <div class="w-full">
+                    <label for="username">Username:</label>
+                    <input type="text" name="username">
+                </div>
+                <div class="w-full">
+                    <label for="password">Password:</label>
+                    <input type="password" name="password">
+                </div>
+
+                <input type="submit" value="Submit">
+            </form>
+
+            <br>
+
+            <p>
+                Don't have an account? You can reigster for one <a href="/auth/register">here</a>.
+            </p>
+        </div>
+    #endexport
+#endextend
