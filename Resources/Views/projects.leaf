@@ -8,12 +8,12 @@
                 <h1>#(data.ownerName)'s Projects</h1>
                 #endif
             </div>
-            <div class="bg-cloud-50 border-stone-50 md:p-4 md:rounded border-t border-b md:border">
+            <div class="bg-cloud-50 border-stone-50 md:rounded border-t border-b md:border">
                 #if(count(data.projects) == 0):
-                    <div class="text-stone text-center w-full py-4">
+                    <div class="text-stone text-center w-full py-4 md:p-4">
                         <div class="text-3xl m-auto">¯\_(ツ)_/¯</div>
                         <div class="mt-2 flex flex-col items-center space-y-4">
-                            #if(app.user.userID == data.ownerID):
+                            #if(app.user.id == data.user.id):
                                 <p>You don't have any projects yet.</p>
 
                                 <a href="/create-project" class="pokitoki-button">Create A Project</a>
@@ -21,6 +21,12 @@
                             #endif
                         </div>
                     </div>
+                #else:
+                    #for(project in data.projects):
+                    <a class="px-6 py-4 block" href="/projects/#(project.slug)">
+                       #(project.name)
+                    </a>
+                    #endfor
                 #endif
             </div>
         </div>
