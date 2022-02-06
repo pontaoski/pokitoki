@@ -30,17 +30,16 @@ struct AuthController: AppRouteCollection {
     func registerPost(req: Request) async throws -> Response {
         let form = try req.content.decode(RegisterForm.self)
 
-        let newUser = DatabaseUser(
-            _id: nil,
+        let newUser = User(
+            id: nil,
             username: form.username,
             password: try await req.password.async.hash(form.password)
         )
+        try await newUser.save(on: req.db)
 
-        guard let id = try await req.userCollection.insertOne(newUser) else {
-            throw Abort(.internalServerError)
-        }
+        try await req.createNewSessionFor(user: newUser)
 
-        try await req.createNewSessionFor(userID: id.insertedID.objectIDValue!)
+        req.auth.login(newUser)
 
         return req.redirect(to: "/")
     }
@@ -55,7 +54,8 @@ struct AuthController: AppRouteCollection {
     }
     func loginPost(req: Request) async throws -> Response {
         let form = try req.content.decode(LoginForm.self)
-        guard let user = try await req.userCollection.findOne(["username": .string(form.username)]) else {
+        
+        guard let user = try await User.query(on: req.db).filter(\.$username == form.username).first() else {
             throw Abort(.notFound)
         }
 
@@ -64,7 +64,9 @@ struct AuthController: AppRouteCollection {
             throw Abort(.unauthorized)
         }
 
-        try await req.createNewSessionFor(userID: user._id!)
+        try await req.createNewSessionFor(user: user)
+
+        req.auth.login(user)
 
         return req.redirect(to: "/")
     }

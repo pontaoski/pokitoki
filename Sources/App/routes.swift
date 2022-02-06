@@ -1,6 +1,5 @@
 import Fluent
 import Vapor
-import MongoDBVapor
 
 func routes(_ app: Application) throws {
     try app.register(collection: IndexController())

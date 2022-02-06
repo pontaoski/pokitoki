@@ -1,8 +1,8 @@
 import Redis
-import MongoDBVapor
 import Leaf
 import Vapor
 import Foundation
+import FluentSQLiteDriver
 
 extension Application.Views.Provider {
     public static var wrappedLeaf: Self {
@@ -25,20 +25,20 @@ public func configure(_ app: Application) throws {
     let cors = CORSMiddleware(configuration: corsConfiguration)
     app.sessions.use(.redis)
 
+    app.migrations.add(Initial())
+    app.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
+
     // cors middleware should come before default error middleware using `at: .beginning`
     app.middleware.use(cors, at: .beginning)
     app.middleware.use(app.sessions.middleware)
     app.middleware.use(UserSessionAuthenticator())
     app.middleware.use(UserBasicAuthenticator())
+    app.redis.configuration = try RedisConfiguration(hostname: "localhost")
 
     // uncomment to serve files from /Public folder
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
-    try app.mongoDB.configure("mongodb://localhost:27017")
-    app.redis.configuration = try RedisConfiguration(hostname: "localhost")
-
     app.views.use(.wrappedLeaf)
-    app.commands.use(MigrateCommand(), as: "mongo-migrate")
 
     // register routes
     try routes(app)

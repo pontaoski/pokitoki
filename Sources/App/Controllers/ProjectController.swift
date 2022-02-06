@@ -1,6 +1,5 @@
 import Fluent
 import Vapor
-import MongoDBVapor
 
 struct ProjectController: AppRouteCollection {
     func boot(with: Application) throws {
@@ -14,24 +13,23 @@ struct ProjectController: AppRouteCollection {
     }
 
     struct ProjectsData: Codable {
-        let ownerID: BSONObjectID
-        let ownerName: String
-        let projects: [DatabaseProject]
+        let user: User
+        let projects: [Project]
     }
 
     func myProjects(req: Request) async throws -> Response {
-        let user: User = req.auth.get()!
+        let user: User = try req.auth.require()
 
         return req.redirect(to: "/projects-of/\(user.username)")
     }
     func projects(req: Request) async throws -> View {
-        let user = try await req.userCollection.getBy(username: req.parameters.get("ofuser")!)
-        let projects = try await req.projectCollection.getOwnedBy(user)
+        guard let user = try await User.query(on: req.db).with(\.$projects).filter(\.$username == req.parameters.get("ofuser")!).first() else {
+            throw Abort(.notFound)
+        }
 
         return try await req.view.render("projects", ProjectsData(
-            ownerID: user._id!,
-            ownerName: user.username,
-            projects: projects
+            user: user,
+            projects: user.projects
         ))
     }
 
@@ -43,28 +41,29 @@ struct ProjectController: AppRouteCollection {
         let projectName: String
     }
     func createProjectPost(req: Request) async throws -> Response {
-        let user: User = req.auth.get()!
+        let user: User = try req.auth.require()
         let form = try req.content.decode(CreateProjectData.self)
         guard let slugged = form.projectName.slugged else {
             throw Abort(.badRequest)
         }
 
         let slug = slugged + "-" + randomString(length: 4)
-        
-        try await req.projectCollection.insertOne(DatabaseProject(
-            _id: nil,
-            owner: user.userID,
+
+        try await Project(
+            id: nil,
+            owner: user.id!,
             name: form.projectName,
             slug: slug,
-            languages: [],
-            files: []
-        ))
+            languages: []
+        ).save(on: req.db)
 
         return req.redirect(to: "/projects/\(slug)")
     }
     func project(req: Request) async throws -> View {
-        let project =
-            try await req.projectCollection.getBy(slug: req.parameters.get("slug")!)
+        guard let project =
+            try await Project.query(on: req.db).filter(\.$slug == req.parameters.get("slug")!).first() else {
+            throw Abort(.notFound)
+        }
 
         return try await req.view.render("project-homepage", project)
     }
