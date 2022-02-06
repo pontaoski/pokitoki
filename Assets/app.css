@@ -34,4 +34,5 @@ input[type="submit"], button, .pokitoki-button {
 
 input[type="submit"]:active, button:active, .pokitoki-button:active {
     text-shadow: none;
+    box-shadow: none;
 }
