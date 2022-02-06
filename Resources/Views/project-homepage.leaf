@@ -1,0 +1,33 @@
+#extend("base"):
+    #export("body"):
+        <div class="flex flex-col w-full h-full md:max-w-lg m-auto mt-10 space-y-4">
+            <div class="prose px-4">
+                <h1>#(data.name)</h1>
+                <h2>Target Languages</h2>
+            </div>
+            <div class="bg-cloud-50 border-stone-50 md:p-4 md:rounded border-t border-b md:border">
+                <div class="text-stone text-center w-full py-4">
+                    <div class="text-3xl m-auto">¯\_(ツ)_/¯</div>
+                    <div class="mt-2 flex flex-col items-center space-y-4">
+                        <p>You don't have any target languages yet.</p>
+
+                        <a href="/create-project" class="pokitoki-button">Add A Target Language</a>
+                    </div>
+                </div>
+            </div>
+            <div class="prose px-4">
+                <h2>Translation Files</h2>
+            </div>
+            <div class="bg-cloud-50 border-stone-50 md:p-4 md:rounded border-t border-b md:border">
+                <div class="text-stone text-center w-full py-4">
+                    <div class="text-3xl m-auto">¯\_(ツ)_/¯</div>
+                    <div class="mt-2 flex flex-col items-center space-y-4">
+                        <p>You don't have any files to translate yet.</p>
+
+                        <a href="/create-project" class="pokitoki-button">Upload A File</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #endexport
+#endextend

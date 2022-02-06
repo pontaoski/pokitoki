@@ -29,10 +29,32 @@ struct DatabasePOFile: Codable {
 struct DatabaseLanguage: Codable {
     var name: String
     var code: String
+    var pluralForms: PluralForms
+    var textDirection: TextDirection
+}
+
+enum TextDirection: Codable {
+    case LeftToRight, RightToLeft
+}
+
+enum PluralForms: Codable {
+    case OneOther,
+         OneTwoOther,
+         OneFewOther,
+         OneFewManyOther,
+         OneTwoFewOther,
+         OneTwoFewManyOther,
+         ZeroOneOther,
+         ZeroOneTwoFewManyOther,
+         Other
 }
 
 struct DatabaseProject: Codable {
+    var _id: BSONObjectID?
+
     var owner: BSONObjectID
+    var name: String
+    var slug: String
     var languages: [DatabaseLanguage]
     var files: [DatabasePOFile]
 }
@@ -128,6 +150,16 @@ extension MongoCollection where T == DatabaseProject {
         
         return try await cursor.toArray()
     }
+    func getBy(slug: String) async throws -> DatabaseProject {
+        let val =
+            try await self.findOne(["slug": .string(slug)])
+
+        guard let value = val else {
+            throw Abort(.notFound)
+        }
+
+        return value
+    }
 }
 
 extension MongoCollection where T == DatabaseUser {
@@ -217,5 +249,25 @@ struct WrappedRenderer: ViewRenderer {
 
     func render<E>(_ name: String, _ context: E) -> EventLoopFuture<View> where E : Encodable {
         return inner.render(name, context)
+    }
+}
+
+extension String {
+    private static let slugSafeCharacters = CharacterSet(charactersIn: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-")
+
+    public var slugged: String? {
+        get {
+            guard let data = self.data(using: .ascii, allowLossyConversion: true) else {
+                return nil
+            }
+            guard let str = String(data: data, encoding: .ascii) else {
+                return nil
+            }
+
+            return str.lowercased()
+               .components(separatedBy: String.slugSafeCharacters.inverted)
+               .filter { $0 != "" }
+               .joined(separator: "-")
+        }
     }
 }
